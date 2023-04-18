@@ -4,7 +4,7 @@ import Image from '../Share/img/Image';
 import convertMoney from '../convertMoney';
 import { Link } from 'react-router-dom';
 
-function Home(props) {
+function Home() {
   const [products, setProducts] = useState([]);
 
   //Fetch Product

@@ -1,17 +1,20 @@
-import React, { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import UserAPI from "../API/UserAPI";
-import "./Auth.css";
-import queryString from "query-string";
-import MessengerAPI from "../API/MessengerAPI";
+import React, { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import UserAPI from '../API/UserAPI';
+import './Auth.css';
+import alertify from 'alertifyjs';
+// import queryString from 'query-string';
+// import MessengerAPI from '../API/MessengerAPI';
 
 SignUp.propTypes = {};
 
-function SignUp(props) {
-  const [fullname, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
+function SignUp() {
+  const [fullname, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
 
   const [errorEmail, setEmailError] = useState(false);
   const [emailRegex, setEmailRegex] = useState(false);
@@ -21,20 +24,8 @@ function SignUp(props) {
 
   const [success, setSuccess] = useState(false);
 
-  const onChangeName = (e) => {
-    setFullName(e.target.value);
-  };
-
-  const onChangeEmail = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const onChangePassword = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const onChangePhone = (e) => {
-    setPhone(e.target.value);
+  const handleInputChange = (e, setFunc) => {
+    setFunc(e.target.value);
   };
 
   const handlerSignUp = (e) => {
@@ -95,40 +86,43 @@ function SignUp(props) {
               setPhoneError(true);
               setPasswordError(false);
             } else {
-              console.log("Thanh Cong");
-
               const fetchSignUp = async () => {
-                const params = {
-                  fullname: fullname,
-                  email: email,
-                  password: password,
-                  phone: phone,
+                const data = {
+                  fullName: fullname,
+                  email,
+                  password,
+                  confirmPassword,
+                  phoneNumber: phone,
+                  address,
                 };
 
-                const query = "?" + queryString.stringify(params);
-
-                const response = await UserAPI.postSignUp(query);
-                console.log(response);
-
-                setSuccess(true);
+                try {
+                  await UserAPI.postSignUp(data);
+                  // console.log(response);
+                  setSuccess(true);
+                } catch (err) {
+                  console.log(err);
+                  alertify.set('notifier', 'position', 'top-right');
+                  alertify.error(err?.response?.data?.message || err.message);
+                }
               };
 
               fetchSignUp();
 
-              // Hàm này dùng để tạo các conversation cho user và admin
-              const fetchConversation = async () => {
-                const params = {
-                  email: email,
-                  password: password,
-                };
+              // // Hàm này dùng để tạo các conversation cho user và admin
+              // const fetchConversation = async () => {
+              //   const params = {
+              //     email: email,
+              //     password: password,
+              //   };
 
-                const query = "?" + queryString.stringify(params);
+              //   const query = '?' + queryString.stringify(params);
 
-                const response = await MessengerAPI.postConversation(query);
-                console.log(response);
-              };
+              //   const response = await MessengerAPI.postConversation(query);
+              //   console.log(response);
+              // };
 
-              fetchConversation();
+              // fetchConversation();
             }
           }
         }
@@ -172,7 +166,7 @@ function SignUp(props) {
             <input
               className="input100"
               value={fullname}
-              onChange={onChangeName}
+              onChange={(e) => handleInputChange(e, setFullName)}
               type="text"
               placeholder="Full Name"
             />
@@ -182,7 +176,7 @@ function SignUp(props) {
             <input
               className="input100"
               value={email}
-              onChange={onChangeEmail}
+              onChange={(e) => handleInputChange(e, setEmail)}
               type="text"
               placeholder="Email"
             />
@@ -192,9 +186,18 @@ function SignUp(props) {
             <input
               className="input100"
               value={password}
-              onChange={onChangePassword}
+              onChange={(e) => handleInputChange(e, setPassword)}
               type="password"
               placeholder="Password"
+            />
+          </div>
+          <div className="wrap-input100 rs1 validate-input">
+            <input
+              className="input100"
+              value={confirmPassword}
+              onChange={(e) => handleInputChange(e, setConfirmPassword)}
+              type="password"
+              placeholder="Confirm Password"
             />
           </div>
 
@@ -202,14 +205,23 @@ function SignUp(props) {
             <input
               className="input100"
               value={phone}
-              onChange={onChangePhone}
+              onChange={(e) => handleInputChange(e, setPhone)}
               type="text"
               placeholder="Phone"
             />
           </div>
+          <div className="wrap-input100 rs1 validate-input">
+            <input
+              className="input100"
+              value={address}
+              onChange={(e) => handleInputChange(e, setAddress)}
+              type="text"
+              placeholder="Address"
+            />
+          </div>
 
           <div className="container-login100-form-btn m-t-20">
-            {success && <Navigate to={"/signin"} />}
+            {success && <Navigate to={'/signin'} />}
             <button className="login100-form-btn" onClick={handlerSignUp}>
               Sign Up
             </button>
