@@ -3,7 +3,7 @@ import ProductAPI from '../API/ProductAPI';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import alertify from 'alertifyjs';
-import { addCart } from '../Redux/Action/ActionCart';
+// import { addCart } from '../Redux/Action/ActionCart';
 import CartAPI from '../API/CartAPI';
 import queryString from 'query-string';
 // import CommentAPI from '../API/CommentAPI';
@@ -166,28 +166,29 @@ function Detail() {
   };
 
   //Hàm này là Thêm Sản Phẩm
-  const addToCart = () => {
-    const fetchPost = async () => {
-      const params = {
-        idUser, //localStorage.getItem('id_user')
-        idProduct: detail._id, // Lấy idProduct
-        count: text, // Lấy số lượng
-      };
-      console.log(params);
-      try {
-        const query = '?' + queryString.stringify(params);
-
-        const response = await CartAPI.postAddToCart(query);
-
-        console.log(response);
-        alertify.set('notifier', 'position', 'bottom-left');
-        alertify.success('Bạn Đã Thêm Hàng Thành Công!');
-      } catch (err) {
-        console.log(err);
-      }
+  const addToCart = async () => {
+    const params = {
+      idUser, //localStorage.getItem('id_user')
+      idProduct: detail._id, // Lấy idProduct
+      count: text, // Lấy số lượng
     };
+    console.log(params);
+    try {
+      const query = '?' + queryString.stringify(params);
+      const response = await CartAPI.postAddToCart(query);
+      console.log(response);
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.success('Bạn Đã Thêm Hàng Thành Công!');
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    fetchPost();
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
   return (
@@ -432,6 +433,7 @@ function Detail() {
                       <Link
                         className="reset-anchor"
                         to={`/detail/${value._id}`}
+                        onClick={scrollToTop}
                       >
                         {value.name}
                       </Link>

@@ -19,7 +19,6 @@ function Home() {
 
     fetchData();
   }, []);
-
   return (
     <div className="page-holder">
       <header className="header bg-white">

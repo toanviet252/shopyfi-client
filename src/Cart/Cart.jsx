@@ -1,215 +1,159 @@
-import React, { useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { deleteCart, updateCart } from "../Redux/Action/ActionCart"
-import ListCart from "./Component/ListCart"
-import alertify from "alertifyjs"
-import { Link, useNavigate, Navigate } from "react-router-dom"
-import CartAPI from "../API/CartAPI"
-import queryString from "query-string"
-import convertMoney from "../convertMoney"
+import React, { useEffect, useMemo, useState } from 'react';
+import ListCart from './Component/ListCart';
+import alertify from 'alertifyjs';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import CartAPI from '../API/CartAPI';
+import queryString from 'query-string';
+import convertMoney from '../convertMoney';
 
-function Cart(props) {
+function Cart() {
   //id_user được lấy từ redux
-  const id_user = useSelector((state) => state.Cart.id_user)
+  // const id_user = useSelector((state) => state.Cart.id_user)
+
+  const idUser = localStorage.getItem('id_user');
 
   //listCart được lấy từ redux
-  const listCart = useSelector((state) => state.Cart.listCart)
+  // const listCart = useSelector((state) => state.Cart.listCart);
 
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState([]);
 
-  const [total, setTotal] = useState()
+  // const dispatch = useDispatch();
 
-  const dispatch = useDispatch()
-
-  //State dùng để Load dữ liệu từ Redux
-  const [loadRedux, setLoadRedux] = useState({
-    idProduct: "",
-    count: "",
-  })
+  // //State dùng để Load dữ liệu từ Redux
+  // const [loadRedux, setLoadRedux] = useState({
+  //   idProduct: '',
+  //   count: '',
+  // });
 
   //State dùng để Load dữ liệu từ API
-  const [loadAPI, setLoadAPI] = useState(false)
+  const [loadAPI, setLoadAPI] = useState(false);
 
   //Hàm này dùng để Load dữ liệu ở Redux
-  //Khi người dùng chưa đăng nhập
-  useEffect(() => {
-    const fetchDataRedux = () => {
-      if (!localStorage.getItem("id_user")) {
-        setCart(listCart)
+  // //Khi người dùng chưa đăng nhập
+  // useEffect(() => {
+  //   const fetchDataRedux = () => {
+  //     if (!localStorage.getItem('id_user')) {
+  //       setCart(listCart);
 
-        getTotal(listCart)
-      }
-    }
+  //       getTotal(listCart);
+  //     }
+  //   };
 
-    fetchDataRedux()
-  }, [loadRedux])
+  //   fetchDataRedux();
+  // }, [loadRedux]);
 
   //Hàm này dùng để tính tổng tiền carts
-  function getTotal(carts) {
-    let sub_total = 0
+  // const getTotal = useCallback(
+  //   (carts) => {
+  //     if (cart.length > 0) {
 
-    const sum_total = carts.map((value) => {
-      return (sub_total += parseInt(value.priceProduct) * parseInt(value.count))
-    })
+  //     }
+  //   },
+  //   [cart, loadAPI],
+  // );
+  // function getTotal(carts) {
+  //   let sub_total = 0;
 
-    setTotal(sub_total)
-  }
+  //   const sum_total = carts?.map((value) => {
+  //     return (sub_total +=
+  //       parseInt(value.priceProduct) * parseInt(value.count));
+  //   });
+
+  //   setTotal(sub_total);
+  // }
+  const totalPrice = useMemo(() => {
+    return cart?.length > 0
+      ? cart
+          .map((item) => item.product.price * item.quantity)
+          .reduce((acc, cur) => acc + cur, 0)
+      : 0;
+  }, [cart, loadAPI]);
+  // console.log(totalPrice);
 
   //Hàm này dùng để load dữ liệu từ API
-  //Khi người dùng đã đăng nhập
   useEffect(() => {
     const fetchData = async () => {
-      if (localStorage.getItem("id_user")) {
-        const params = {
-          idUser: localStorage.getItem("id_user"),
-        }
+      const params = {
+        idUser,
+      };
 
-        const query = "?" + queryString.stringify(params)
+      const query = '?' + queryString.stringify(params);
 
-        console.log(query)
+      const response = await CartAPI.getCarts(query);
 
-        const response = await CartAPI.getCarts(query)
+      setCart(response.data);
 
-        setCart(response)
+      // getTotal(response);
+    };
 
-        getTotal(response)
-      }
-    }
+    fetchData();
 
-    fetchData()
-
-    setLoadAPI(false)
-  }, [loadAPI])
+    setLoadAPI(false);
+  }, [loadAPI]);
 
   //Hàm này dùng để truyền xuống cho component con xử và trả ngược dữ liệu lại component cha
-  const onDeleteCart = (getUser, getProduct) => {
-    console.log("idUser: " + getUser + ", idProduct: " + getProduct)
-
-    if (localStorage.getItem("id_user")) {
-      // user đã đăng nhập
-
-      //Sau khi nhận được dữ liệu ở component con truyền lên thì sẽ gọi API xử lý dữ liệu
-      const fetchDelete = async () => {
-        const params = {
-          idUser: getUser,
-          idProduct: getProduct,
-        }
-
-        const query = "?" + queryString.stringify(params)
-
-        const response = await CartAPI.deleteToCart(query)
-        console.log(response)
-      }
-
-      fetchDelete()
-
-      //Sau đó thay đổi state loadAPI và load lại hàm useEffect
-      setLoadAPI(true)
-
-      alertify.set("notifier", "position", "bottom-left")
-      alertify.error("Bạn Đã Xóa Hàng Thành Công!")
-    } else {
-      // user chưa đăng nhập
-
-      //Nếu không có phiên làm việc của Session User thì mình sẽ xử lý với Redux
-      const data = {
-        idProduct: getProduct,
+  const onDeleteCart = async (getUser, getProduct) => {
+    //Sau khi nhận được dữ liệu ở component con truyền lên thì sẽ gọi API xử lý dữ liệu
+    try {
+      const params = {
         idUser: getUser,
-      }
-
-      //Đưa dữ liệu vào Redux
-      const action = deleteCart(data)
-      dispatch(action)
-
-      alertify.set("notifier", "position", "bottom-left")
-      alertify.error("Bạn Đã Xóa Hàng Thành Công!")
-
-      //set state loadRedux để nó load lại hàm useEffect để tiếp tục lấy dữ liệu từ redux
-      setLoadRedux({
         idProduct: getProduct,
-        count: "",
-      })
+      };
+
+      const query = '?' + queryString.stringify(params);
+
+      const response = await CartAPI.deleteToCart(query);
+      console.log(response);
+      //Sau đó thay đổi state loadAPI và load lại hàm useEffect
+      setLoadAPI(true);
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.error('Bạn Đã Xóa Hàng Thành Công!');
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
   //Hàm này dùng để truyền xuống cho component con xử và trả ngược dữ liệu lại component cha
-  const onUpdateCount = (getUser, getProduct, getCount) => {
-    console.log(
-      "Count: " +
-        getCount +
-        ", idUser: " +
-        getUser +
-        ", idProduct: " +
-        getProduct
-    )
+  const onUpdateCount = async (getUser, getProduct, getCount) => {
+    //Sau khi nhận được dữ liệu ở component con truyền lên thì sẽ gọi API xử lý dữ liệu
 
-    if (localStorage.getItem("id_user")) {
-      // user đã đăng nhập
+    const params = {
+      idUser: getUser,
+      idProduct: getProduct,
+      count: getCount,
+    };
 
-      //Sau khi nhận được dữ liệu ở component con truyền lên thì sẽ gọi API xử lý dữ liệu
-      const fetchPut = async () => {
-        const params = {
-          idUser: getUser,
-          idProduct: getProduct,
-          count: getCount,
-        }
-
-        const query = "?" + queryString.stringify(params)
-
-        const response = await CartAPI.putToCart(query)
-        console.log(response)
-      }
-
-      fetchPut()
-
+    const query = '?' + queryString.stringify(params);
+    try {
+      const response = await CartAPI.putToCart(query);
+      console.log(response);
       //Sau đó thay đổi state loadAPI và load lại hàm useEffect
-      setLoadAPI(true)
-
-      console.log("Ban Da Dang Nhap!")
-
-      alertify.set("notifier", "position", "bottom-left")
-      alertify.success("Bạn Đã Sửa Hàng Thành Công!")
-    } else {
-      //Nếu không có phiên làm việc của Session User thì mình sẽ xử lý với Redux
-      const data = {
-        idProduct: getProduct,
-        idUser: getUser,
-        count: getCount,
-      }
-
-      //Đưa dữ liệu vào Redux
-      const action = updateCart(data)
-      dispatch(action)
-
-      alertify.set("notifier", "position", "bottom-left")
-      alertify.success("Bạn Đã Sửa Hàng Thành Công!")
-
-      //set state loadRedux để nó load lại hàm useEffect để tiếp tục lấy dữ liệu từ redux
-      setLoadRedux({
-        idProduct: getProduct,
-        count: getCount,
-      })
+      setLoadAPI(true);
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.success('Bạn Đã Sửa Hàng Thành Công!');
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
   //Hàm này dùng để redirect đến page checkout
-  const [redirect, setRedirect] = useState(false)
+  const [redirect, setRedirect] = useState(false);
 
   const onCheckout = () => {
-    if (!localStorage.getItem("id_user")) {
-      alertify.set("notifier", "position", "bottom-left")
-      alertify.error("Vui Lòng Kiểm Tra Lại Đăng Nhập!")
-      return
+    if (!localStorage.getItem('id_user')) {
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.error('Vui Lòng Kiểm Tra Lại Đăng Nhập!');
+      return;
     }
 
     if (cart.length === 0) {
-      alertify.set("notifier", "position", "bottom-left")
-      alertify.error("Vui Lòng Kiểm Tra Lại Giỏ Hàng!")
-      return
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.error('Vui Lòng Kiểm Tra Lại Giỏ Hàng!');
+      return;
     }
 
-    setRedirect(true)
-  }
+    setRedirect(true);
+  };
   // const navigate = useNaigate()
 
   return (
@@ -240,6 +184,7 @@ function Cart(props) {
               listCart={cart}
               onDeleteCart={onDeleteCart}
               onUpdateCount={onUpdateCount}
+              idUser={idUser}
             />
 
             <div className="bg-light px-4 py-3">
@@ -254,7 +199,9 @@ function Cart(props) {
                   </Link>
                 </div>
                 <div className="col-md-6 text-md-right">
-                  {redirect && <Navigate to={"/checkout"} />}
+                  {redirect && (
+                    <Navigate to={'/checkout'} state={{ total: totalPrice }} />
+                  )}
                   <span
                     className="btn btn-outline-dark btn-sm"
                     onClick={onCheckout}
@@ -276,7 +223,7 @@ function Cart(props) {
                       Subtotal
                     </strong>
                     <span className="text-muted small">
-                      {convertMoney(total)} VND
+                      {convertMoney(totalPrice)} VND
                     </span>
                   </li>
                   <li className="border-bottom my-2"></li>
@@ -284,7 +231,7 @@ function Cart(props) {
                     <strong className="text-uppercase small font-weight-bold">
                       Total
                     </strong>
-                    <span>{convertMoney(total)} VND</span>
+                    <span>{convertMoney(totalPrice)} VND</span>
                   </li>
                 </ul>
               </div>
@@ -293,7 +240,7 @@ function Cart(props) {
         </div>
       </section>
     </div>
-  )
+  );
 }
 
-export default Cart
+export default Cart;
