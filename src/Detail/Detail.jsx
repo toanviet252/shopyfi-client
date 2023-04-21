@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductAPI from '../API/ProductAPI';
 import { Link, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+// import { useDispatch, useSelector } from 'react-redux';
 import alertify from 'alertifyjs';
 // import { addCart } from '../Redux/Action/ActionCart';
 import CartAPI from '../API/CartAPI';
@@ -12,7 +12,7 @@ import convertMoney from '../convertMoney';
 function Detail() {
   const [detail, setDetail] = useState(undefined);
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   //id params cho từng sản phẩm
   const { id } = useParams();
@@ -172,7 +172,7 @@ function Detail() {
       idProduct: detail._id, // Lấy idProduct
       count: text, // Lấy số lượng
     };
-    console.log(params);
+    // console.log(params);
     try {
       const query = '?' + queryString.stringify(params);
       const response = await CartAPI.postAddToCart(query);
@@ -181,6 +181,8 @@ function Detail() {
       alertify.success('Bạn Đã Thêm Hàng Thành Công!');
     } catch (err) {
       console.log(err);
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.error(err?.response?.data?.message || err?.message);
     }
   };
 
@@ -190,7 +192,7 @@ function Detail() {
       behavior: 'smooth',
     });
   };
-
+  // console.log(detail);
   return (
     <section className="py-5">
       <div className="container">
@@ -298,9 +300,11 @@ function Detail() {
                       </button>
                       <input
                         className="form-control border-0 shadow-0 p-0"
-                        type="text"
+                        type="number"
                         value={text}
                         onChange={onChangeText}
+                        max={detail.count}
+                        min={0}
                       />
                       <button
                         className="inc-btn p-0"
