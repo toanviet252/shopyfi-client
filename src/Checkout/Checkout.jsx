@@ -48,8 +48,7 @@ function Checkout() {
 
       const response = await CartAPI.getCarts(query);
 
-      console.log(response);
-
+      console.log(response.data);
       setCarts(response.data);
       const prodData = response.data.map((item) => ({
         product: item.product._id,
@@ -134,7 +133,7 @@ function Checkout() {
               setLoad(true);
               const data = {
                 userOrder: idUser,
-                products,
+                products: carts,
                 orderInfor: {
                   fullname,
                   phoneNumber: phone,
@@ -150,6 +149,7 @@ function Checkout() {
                 setSuccess(true);
               } catch (err) {
                 console.log(err);
+                setLoad(false);
               }
             }
           }

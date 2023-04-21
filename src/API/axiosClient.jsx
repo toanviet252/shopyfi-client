@@ -24,6 +24,9 @@ axiosClient.interceptors.request.use(async (config) => {
 axiosClient.interceptors.response.use(
   (response) => {
     if (response && response.data) {
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(response.data.message);
+      }
       return response.data;
     }
     return response;

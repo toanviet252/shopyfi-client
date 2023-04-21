@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ListCart from './Component/ListCart';
 import alertify from 'alertifyjs';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import CartAPI from '../API/CartAPI';
 import queryString from 'query-string';
 import convertMoney from '../convertMoney';
@@ -78,10 +78,13 @@ function Cart() {
       };
 
       const query = '?' + queryString.stringify(params);
+      try {
+        const response = await CartAPI.getCarts(query);
 
-      const response = await CartAPI.getCarts(query);
-
-      setCart(response.data);
+        setCart(response.data);
+      } catch (err) {
+        console.log(err);
+      }
 
       // getTotal(response);
     };
@@ -125,8 +128,8 @@ function Cart() {
 
     const query = '?' + queryString.stringify(params);
     try {
-      const response = await CartAPI.putToCart(query);
-      console.log(response);
+      await CartAPI.putToCart(query);
+
       //Sau đó thay đổi state loadAPI và load lại hàm useEffect
       setLoadAPI(true);
       alertify.set('notifier', 'position', 'bottom-left');

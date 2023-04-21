@@ -1,9 +1,9 @@
 import axiosClient from './axiosClient';
 
 const CartAPI = {
-  getCarts: (query) => {
+  getCarts: async (query) => {
     const url = `/carts${query}`;
-    return axiosClient.get(url);
+    return await axiosClient.get(url);
   },
 
   postAddToCart: async (query) => {

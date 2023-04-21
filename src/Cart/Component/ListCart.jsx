@@ -110,6 +110,7 @@ function ListCart(props) {
                       className="form-control form-control-sm border-0 shadow-0 p-0"
                       type="text"
                       value={value.quantity}
+                      readOnly
                     />
                     <button
                       className="inc-btn p-0"

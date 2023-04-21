@@ -30,7 +30,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />{' '}
           <Route path="/signup" element={<SignUp />} />{' '}
           <Route path="/checkout" element={<Checkout />} />{' '}
-          <Route path="/history" element={<History />} />{' '}
+          <Route path="/history/*" element={<History />} />{' '}
           <Route path="/shop" element={<Shop />} />
         </Routes>{' '}
         <Chat />
