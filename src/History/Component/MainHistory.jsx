@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import HistoryAPI from '../../API/HistoryAPI';
 import queryString from 'query-string';
+import alertify from 'alertifyjs';
 
 MainHistory.propTypes = {};
 
-function MainHistory(props) {
+function MainHistory() {
   const [listCart, setListCart] = useState([]);
   const idUser = localStorage.getItem('id_user');
 
@@ -18,11 +19,12 @@ function MainHistory(props) {
       const query = '?' + queryString.stringify(params);
 
       const response = await HistoryAPI.getHistoryAPI(query);
-      console.log(response.data);
 
       setListCart(response.data);
     } catch (err) {
       console.log(err);
+      alertify.set('notifier', 'position', 'top-right');
+      alertify.error(err?.response?.data?.message || err.message);
     }
   };
 

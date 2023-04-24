@@ -11,7 +11,6 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       const response = await ProductAPI.getAPI();
-      console.log(response);
       const data = response.data.splice(0, 8);
 
       setProducts(data);

@@ -175,12 +175,11 @@ function Detail() {
     // console.log(params);
     try {
       const query = '?' + queryString.stringify(params);
-      const response = await CartAPI.postAddToCart(query);
-      console.log(response);
+      await CartAPI.postAddToCart(query);
+  
       alertify.set('notifier', 'position', 'bottom-left');
       alertify.success('Bạn Đã Thêm Hàng Thành Công!');
     } catch (err) {
-      console.log(err);
       alertify.set('notifier', 'position', 'bottom-left');
       alertify.error(err?.response?.data?.message || err?.message);
     }

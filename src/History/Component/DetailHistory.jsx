@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import HistoryAPI from '../../API/HistoryAPI';
 import convertMoney from '../../convertMoney';
+import alertify from 'alertifyjs';
 
 function DetailHistory() {
   const { id } = useParams();
@@ -12,11 +13,10 @@ function DetailHistory() {
     const fetchData = async () => {
       try {
         const response = await HistoryAPI.getDetail(id);
-        console.log(response);
-
         setData(response.data);
       } catch (err) {
-        console.log(err);
+        alertify.set('notifier', 'position', 'top-right');
+        alertify.error(err?.response?.data?.message || err.message);
       }
     };
 

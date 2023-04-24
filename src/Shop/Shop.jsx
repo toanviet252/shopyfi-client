@@ -30,16 +30,12 @@ function Shop() {
 
   //Hàm nà dùng để lấy value từ component SortProduct truyền lên
   const handlerChangeSort = (value) => {
-    console.log('Value: ', value);
-
     setSort(value);
   };
 
   //Hàm này dùng để thay đổi state pagination.page
   //Nó sẽ truyền xuống Component con và nhận dữ liệu từ Component con truyền lên
   const handlerChangePage = (value) => {
-    console.log('Value: ', value);
-
     //Sau đó set lại cái pagination để gọi chạy làm useEffect gọi lại API pagination
     setPagination({
       page: value,
@@ -52,8 +48,6 @@ function Shop() {
   //Hàm này dùng để thay đổi state pagination.search
   //Hàm này sẽ truyền xuống Component con và nhận dữ liệu từ Component con truyền lên
   const handlerSearch = (value) => {
-    console.log('Value: ', value);
-
     setPagination({
       page: pagination.page,
       count: pagination.count,
@@ -111,7 +105,6 @@ function Shop() {
 
   //     fetchData();
   // }, [pagination]);
-  console.log(products);
   return (
     <div className="container">
       <section className="py-5 bg-light">

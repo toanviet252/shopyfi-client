@@ -55,7 +55,6 @@ function SignIn() {
           setErrorEmail(false);
           try {
             const res = await UserAPI.login({ email, password });
-            console.log(res);
 
             saveDataToLocalStorage(res);
             const action = addSession(localStorage.getItem('id_user'));
@@ -64,7 +63,6 @@ function SignIn() {
             // setCheckPush(true);
             setRedirect(true);
           } catch (err) {
-            console.log(err.response);
             alertify.set('notifier', 'position', 'top-right');
             alertify.error(err?.response?.data?.message || err.message);
           }

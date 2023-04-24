@@ -83,7 +83,8 @@ function Cart() {
 
         setCart(response.data);
       } catch (err) {
-        console.log(err);
+        alertify.set('notifier', 'position', 'top-right');
+                  alertify.error(err?.response?.data?.message || err.message);
       }
 
       // getTotal(response);
@@ -105,14 +106,14 @@ function Cart() {
 
       const query = '?' + queryString.stringify(params);
 
-      const response = await CartAPI.deleteToCart(query);
-      console.log(response);
+       await CartAPI.deleteToCart(query);
       //Sau đó thay đổi state loadAPI và load lại hàm useEffect
       setLoadAPI(true);
       alertify.set('notifier', 'position', 'bottom-left');
       alertify.error('Bạn Đã Xóa Hàng Thành Công!');
     } catch (err) {
-      console.log(err);
+      alertify.set('notifier', 'position', 'bottom-left');
+      alertify.error(err?.response?.data?.message || err.message);
     }
   };
 

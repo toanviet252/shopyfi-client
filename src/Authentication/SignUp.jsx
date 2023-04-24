@@ -101,7 +101,6 @@ function SignUp() {
                   // console.log(response);
                   setSuccess(true);
                 } catch (err) {
-                  console.log(err);
                   alertify.set('notifier', 'position', 'top-right');
                   alertify.error(err?.response?.data?.message || err.message);
                 }

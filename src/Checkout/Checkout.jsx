@@ -5,6 +5,7 @@ import CheckoutAPI from '../API/CheckoutAPI';
 import convertMoney from '../convertMoney';
 import './Checkout.css';
 import { useLocation, Link } from 'react-router-dom';
+import alertify from 'alertifyjs';
 
 // import io from 'socket.io-client';
 // const socket = io('http://localhost:5000');
@@ -48,7 +49,6 @@ function Checkout() {
 
       const response = await CartAPI.getCarts(query);
 
-      console.log(response.data);
       setCarts(response.data);
       const prodData = response.data.map((item) => ({
         product: item.product._id,
@@ -143,12 +143,12 @@ function Checkout() {
                 totalPrice,
               };
               try {
-                const response = await CheckoutAPI.postOrder(data);
-                console.log(response);
+                await CheckoutAPI.postOrder(data);
                 setLoad(false);
                 setSuccess(true);
               } catch (err) {
-                console.log(err);
+                alertify.set('notifier', 'position', 'top-right');
+                alertify.error(err?.response?.data?.message || err.message);
                 setLoad(false);
               }
             }
