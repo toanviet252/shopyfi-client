@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import HistoryAPI from '../../API/HistoryAPI';
 import queryString from 'query-string';
-import alertify from 'alertifyjs';
+import { errorNotification } from '../../helpers/notification';
 
 MainHistory.propTypes = {};
 
@@ -23,8 +23,7 @@ function MainHistory() {
       setListCart(response.data);
     } catch (err) {
       console.log(err);
-      alertify.set('notifier', 'position', 'top-right');
-      alertify.error(err?.response?.data?.message || err.message);
+      errorNotification(err?.response?.data?.message || err.message);
     }
   };
 

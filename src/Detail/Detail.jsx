@@ -8,6 +8,7 @@ import CartAPI from '../API/CartAPI';
 import queryString from 'query-string';
 // import CommentAPI from '../API/CommentAPI';
 import convertMoney from '../convertMoney';
+import notification, { errorNotification } from '../helpers/notification';
 
 function Detail() {
   const [detail, setDetail] = useState(undefined);
@@ -176,12 +177,9 @@ function Detail() {
     try {
       const query = '?' + queryString.stringify(params);
       await CartAPI.postAddToCart(query);
-  
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.success('Bạn Đã Thêm Hàng Thành Công!');
+      notification('Bạn Đã Thêm Hàng Thành Công!', 'success');
     } catch (err) {
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.error(err?.response?.data?.message || err?.message);
+      errorNotification(err?.response?.data?.message || err.message)
     }
   };
 

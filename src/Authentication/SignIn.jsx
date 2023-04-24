@@ -5,7 +5,7 @@ import UserAPI from '../API/UserAPI';
 import { addSession } from '../Redux/Action/ActionSession';
 import './Auth.css';
 import { saveDataToLocalStorage } from '../utils/auth';
-import alertify from 'alertifyjs';
+import { errorNotification } from '../helpers/notification';
 
 function SignIn() {
   //listCart được lấy từ redux
@@ -63,8 +63,7 @@ function SignIn() {
             // setCheckPush(true);
             setRedirect(true);
           } catch (err) {
-            alertify.set('notifier', 'position', 'top-right');
-            alertify.error(err?.response?.data?.message || err.message);
+            errorNotification(err?.response?.data?.message || err.message);
           }
         }
       }

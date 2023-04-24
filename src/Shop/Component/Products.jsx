@@ -48,7 +48,7 @@ function Products(props) {
               </div>
               <h6>
                 {' '}
-                <a className="reset-anchor" href="detail.html">
+                <a className="reset-anchor" href={`/detail/${value._id}`}>
                   {value.name}
                 </a>
               </h6>

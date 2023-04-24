@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import HistoryAPI from '../../API/HistoryAPI';
 import convertMoney from '../../convertMoney';
-import alertify from 'alertifyjs';
+import { errorNotification } from '../../helpers/notification';
 
 function DetailHistory() {
   const { id } = useParams();
@@ -15,8 +15,7 @@ function DetailHistory() {
         const response = await HistoryAPI.getDetail(id);
         setData(response.data);
       } catch (err) {
-        alertify.set('notifier', 'position', 'top-right');
-        alertify.error(err?.response?.data?.message || err.message);
+        errorNotification(err?.response?.data?.message || err.message);
       }
     };
 

@@ -5,6 +5,7 @@ import { Link, Navigate } from 'react-router-dom';
 import CartAPI from '../API/CartAPI';
 import queryString from 'query-string';
 import convertMoney from '../convertMoney';
+import notification, { errorNotification } from '../helpers/notification';
 
 function Cart() {
   //id_user được lấy từ redux
@@ -83,8 +84,7 @@ function Cart() {
 
         setCart(response.data);
       } catch (err) {
-        alertify.set('notifier', 'position', 'top-right');
-                  alertify.error(err?.response?.data?.message || err.message);
+        errorNotification(err?.response?.data?.message || err.message);
       }
 
       // getTotal(response);
@@ -106,14 +106,13 @@ function Cart() {
 
       const query = '?' + queryString.stringify(params);
 
-       await CartAPI.deleteToCart(query);
+      await CartAPI.deleteToCart(query);
       //Sau đó thay đổi state loadAPI và load lại hàm useEffect
       setLoadAPI(true);
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.error('Bạn Đã Xóa Hàng Thành Công!');
+      notification('Bạn Đã Xóa Hàng Thành Công!', 'error');
     } catch (err) {
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.error(err?.response?.data?.message || err.message);
+      errorNotification(err?.response?.data?.message || err.message);
+      // notification(err?.response?.data?.message || err.message, 'error');
     }
   };
 
@@ -131,12 +130,11 @@ function Cart() {
     try {
       await CartAPI.putToCart(query);
 
-      //Sau đó thay đổi state loadAPI và load lại hàm useEffect
       setLoadAPI(true);
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.success('Bạn Đã Sửa Hàng Thành Công!');
+      notification('Bạn đã sửa hàng thành công', 'success');
     } catch (err) {
       console.log(err);
+      notification(err?.response?.data?.message || err.message, 'error');
     }
   };
 
@@ -145,14 +143,12 @@ function Cart() {
 
   const onCheckout = () => {
     if (!localStorage.getItem('id_user')) {
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.error('Vui Lòng Kiểm Tra Lại Đăng Nhập!');
+      notification('Vui lòng kiểm tra lại đăng nhập', 'error');
       return;
     }
 
     if (cart.length === 0) {
-      alertify.set('notifier', 'position', 'bottom-left');
-      alertify.error('Vui Lòng Kiểm Tra Lại Giỏ Hàng!');
+      errorNotification('Giỏ hàng trống');
       return;
     }
 

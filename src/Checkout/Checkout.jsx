@@ -6,6 +6,7 @@ import convertMoney from '../convertMoney';
 import './Checkout.css';
 import { useLocation, Link } from 'react-router-dom';
 import alertify from 'alertifyjs';
+import { errorNotification } from '../helpers/notification';
 
 // import io from 'socket.io-client';
 // const socket = io('http://localhost:5000');
@@ -147,8 +148,7 @@ function Checkout() {
                 setLoad(false);
                 setSuccess(true);
               } catch (err) {
-                alertify.set('notifier', 'position', 'top-right');
-                alertify.error(err?.response?.data?.message || err.message);
+                errorNotification(err?.response?.data?.message || err.message);
                 setLoad(false);
               }
             }

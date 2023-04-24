@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import UserAPI from '../API/UserAPI';
 import './Auth.css';
-import alertify from 'alertifyjs';
+import { errorNotification } from '../helpers/notification';
 // import queryString from 'query-string';
 // import MessengerAPI from '../API/MessengerAPI';
 
@@ -101,8 +101,9 @@ function SignUp() {
                   // console.log(response);
                   setSuccess(true);
                 } catch (err) {
-                  alertify.set('notifier', 'position', 'top-right');
-                  alertify.error(err?.response?.data?.message || err.message);
+                  errorNotification(
+                    err?.response?.data?.message || err.message,
+                  );
                 }
               };
 
