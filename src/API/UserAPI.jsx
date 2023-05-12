@@ -19,6 +19,11 @@ const UserAPI = {
     const url = `/signup`;
     return axiosClient.post(url, body);
   },
+
+  postSignOut: () => {
+    const url = '/signout';
+    return axiosClient.post(url);
+  },
 };
 
 export default UserAPI;

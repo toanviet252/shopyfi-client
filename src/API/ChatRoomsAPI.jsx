@@ -1,20 +1,21 @@
 import axiosClient from './axiosClient';
 
 const ChatRoomsAPI = {
-	getMessageByRoomId: (roomId) => {
-		const url = `/chatrooms/getById?roomId=${roomId}`;
-		return axiosClient.get(url);
-	},
+  getMessageByRoomId: (roomId) => {
+    const url = `/chatrooms/?roomId=${roomId}`;
+    return axiosClient.get(url);
+  },
 
-	createNewRoom: () => {
-		const url = `/chatrooms/createNewRoom`;
-		return axiosClient.post(url);
-	},
+  createNewRoom: (userId) => {
+    console.log(userId);
+    const url = `/chatrooms?userId=${userId}`;
+    return axiosClient.post(url);
+  },
 
-	addMessage: (body) => {
-		const url = `/chatrooms/addMessage`;
-		return axiosClient.put(url, body);
-	},
+  addMessage: (body) => {
+    const url = `/chatrooms/addMessage`;
+    return axiosClient.post(url, body);
+  },
 };
 
 export default ChatRoomsAPI;

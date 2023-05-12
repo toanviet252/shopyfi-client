@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './Chat.css';
-import queryString from 'query-string';
-
 import ChatRoomsAPI from '../../API/ChatRoomsAPI';
 import { useSelector } from 'react-redux';
+import { socket } from '../../utils/socket';
+import { errorNotification } from '../../helpers/notification';
 
-// import io from 'socket.io-client';
-// const socket = io('http://54.254.177.24:5000', { transports : ['websocket']});
-
-function Chat(props) {
+function Chat() {
   const [activeChat, setActiveChat] = useState(false);
   const [textMessage, setTextMessage] = useState('');
-  const [message, setMessage] = useState();
-  const [roomId, setRoomId] = useState(
-    localStorage.getItem('njs_asm3_roomId') || '',
-  );
+  const [message, setMessage] = useState([]);
+  const [roomId, setRoomId] = useState(localStorage.getItem('room_id'));
+  const userId = localStorage.getItem('id_user');
 
   //Get id_user từ redux khi user đã đăng nhập
   const [load, setLoad] = useState(false);
@@ -27,66 +23,83 @@ function Chat(props) {
   const onChangeText = (e) => {
     setTextMessage(e.target.value);
   };
-
-  const handlerSend = async () => {
+  // console.log('roomid >>', roomId);
+  const handlerSend = async (e) => {
+    e.preventDefault();
     //Sau đó nó emit dữ liệu lên server bằng socket với key send_message và value data
 
     // Check if text equal "/end" then end room
-    if (roomId && textMessage.toLowerCase() === '/end') {
-      await ChatRoomsAPI.addMessage({
-        message: '==END ROOM==',
+    try {
+      if (roomId && textMessage.toLowerCase() === '/end') {
+        await ChatRoomsAPI.addMessage({
+          message: '==END ROOM==',
+          roomId: roomId,
+          is_admin: false,
+        });
+
+        localStorage.removeItem('room_id');
+        setTextMessage('');
+        setRoomId('');
+        setMessage([]);
+        setActiveChat(false);
+
+        return;
+      }
+
+      // Check if roomId is null then create new Room
+      if (!roomId) {
+        const newRoomData = await ChatRoomsAPI.createNewRoom(userId);
+        setRoomId(newRoomData.data);
+        localStorage.setItem('room_id', newRoomData.data);
+      }
+
+      const data = {
+        message: textMessage,
         roomId: roomId,
         is_admin: false,
-      });
+        userId,
+      };
 
-      localStorage.removeItem('njs_asm3_roomId');
+      //Tiếp theo nó sẽ postdata lên api đưa dữ liệu vào database
+      await ChatRoomsAPI.addMessage(data);
+
+      // for another user
+      socket.emit('send_message', data);
+
+      await fetchData();
       setTextMessage('');
-      setRoomId('');
-      setMessage([]);
-      setActiveChat(false);
-
-      return;
+    } catch (err) {
+      errorNotification(err?.response?.data?.mesage || err.message);
     }
-
-    // Check if roomId is null then create new Room
-    if (!roomId) {
-      const newRoomData = await ChatRoomsAPI.createNewRoom();
-      setRoomId(newRoomData._id);
-      localStorage.setItem('njs_asm3_roomId', newRoomData._id);
-    }
-
-    const data = {
-      message: textMessage,
-      roomId: roomId,
-      is_admin: false,
-    };
-
-    //Tiếp theo nó sẽ postdata lên api đưa dữ liệu vào database
-    await ChatRoomsAPI.addMessage(data);
-    setTextMessage('');
-
-    // setTimeout(() => {
-    // 	setLoad(true);
-    // 	socket.emit('send_message', data);
-    // }, 200);
   };
 
   const fetchData = async () => {
-    const response = await ChatRoomsAPI.getMessageByRoomId(roomId);
-    setMessage(response.content);
+    if (!roomId) return;
+    try {
+      const response = await ChatRoomsAPI.getMessageByRoomId(roomId);
+      console.log(response);
+      setMessage(response.data.messages);
+    } catch (err) {
+      errorNotification(err?.response?.data?.message || err.message);
+    }
   };
 
   // Hàm này dùng để load dữ liệu message của user khi user gửi tin nhán
   useEffect(() => {
-    if (load) {
+    if (activeChat) {
       fetchData();
-      setLoad(false);
-    }
-  }, [load]);
 
-  useEffect(() => {
-    setLoad(true);
-  }, [roomId]);
+      socket.connect();
+
+      // for another client
+      // socket.on('posts', (data) => {
+      //   console.log(data);
+      // });
+    }
+    return () => {
+      socket.disconnect();
+    };
+  }, [activeChat, roomId]);
 
   //Hàm này dùng để nhận socket từ server gửi lên
   // useEffect(() => {
@@ -142,7 +155,7 @@ function Chat(props) {
                 </a>
               </div>
               <div className="ps-container ps-theme-default ps-active-y fix_scoll">
-                {message &&
+                {message.length > 0 &&
                   message.map((value) =>
                     !value.is_admin ? (
                       <div
@@ -180,14 +193,14 @@ function Chat(props) {
                   onChange={onChangeText}
                   value={textMessage}
                   style={{ width: '80%' }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handlerSend();
-                    }
-                  }}
+                  // onKeyPress={(e) => {
+                  //   if (e.key === 'Enter') {
+                  //     handlerSend();
+                  //   }
+                  // }}
                 />
                 <a
-                  onClick={handlerSend}
+                  onClick={(e) => handlerSend(e)}
                   className="publisher-btn text-info"
                   data-abc="true"
                 >

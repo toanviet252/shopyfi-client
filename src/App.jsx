@@ -15,9 +15,13 @@ import Checkout from './Checkout/Checkout';
 import History from './History/History';
 import Shop from './Shop/Shop';
 import Chat from './Share/Chat/Chat';
+import { useSelector } from 'react-redux';
+import { getToken } from './utils/auth';
 // import ErrorBoundary from './templates/ErrorBoundary';
 
 function App() {
+  const isAuth = useSelector((state) => state.Session.isAuth);
+  const token = getToken();
   return (
     <div className="App">
       {/* <ErrorBoundary> */}
@@ -33,7 +37,7 @@ function App() {
           <Route path="/history/*" element={<History />} />{' '}
           <Route path="/shop" element={<Shop />} />
         </Routes>{' '}
-        <Chat />
+        {(isAuth || token) && <Chat />}
         <Footer />
       </BrowserRouter>
       {/* </ErrorBoundary> */}
