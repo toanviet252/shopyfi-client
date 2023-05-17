@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Chat.css';
 import ChatRoomsAPI from '../../API/ChatRoomsAPI';
-import { useSelector } from 'react-redux';
 import { socket } from '../../utils/socket';
 import { errorNotification } from '../../helpers/notification';
+import UserAPI from '../../API/UserAPI';
 
 function Chat() {
   const [activeChat, setActiveChat] = useState(false);
@@ -11,9 +11,25 @@ function Chat() {
   const [message, setMessage] = useState([]);
   const [roomId, setRoomId] = useState(localStorage.getItem('room_id'));
   const userId = localStorage.getItem('id_user');
+  const mesRef = useRef();
 
-  //Get id_user từ redux khi user đã đăng nhập
-  const [load, setLoad] = useState(false);
+  useEffect(() => {
+    mesRef?.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [message]);
+
+  const fetchData = async (newRoomId) => {
+    if (!roomId && !newRoomId) return;
+
+    try {
+      const response = newRoomId
+        ? await ChatRoomsAPI.getMessageByRoomId(newRoomId)
+        : await ChatRoomsAPI.getMessageByRoomId(roomId);
+
+      setMessage(response.data.messages);
+    } catch (err) {
+      errorNotification(err?.response?.data?.message || err.message);
+    }
+  };
 
   // Hàm này dùng để mở hộp thoại chat
   const onChat = () => {
@@ -26,16 +42,11 @@ function Chat() {
   // console.log('roomid >>', roomId);
   const handlerSend = async (e) => {
     e.preventDefault();
-    //Sau đó nó emit dữ liệu lên server bằng socket với key send_message và value data
 
     // Check if text equal "/end" then end room
     try {
       if (roomId && textMessage.toLowerCase() === '/end') {
-        await ChatRoomsAPI.addMessage({
-          message: '==END ROOM==',
-          roomId: roomId,
-          is_admin: false,
-        });
+        await UserAPI.deleteChatroom(roomId);
 
         localStorage.removeItem('room_id');
         setTextMessage('');
@@ -47,40 +58,37 @@ function Chat() {
       }
 
       // Check if roomId is null then create new Room
+      let data;
       if (!roomId) {
         const newRoomData = await ChatRoomsAPI.createNewRoom(userId);
         setRoomId(newRoomData.data);
         localStorage.setItem('room_id', newRoomData.data);
+        data = {
+          message: textMessage,
+          roomId: newRoomData.data,
+          userId,
+        };
+        await ChatRoomsAPI.addMessage(data);
+
+        // for another user
+        socket.emit('send_message', data);
+
+        await fetchData(newRoomData.data);
+      } else {
+        data = {
+          message: textMessage,
+          roomId: roomId,
+          userId,
+        };
+        await ChatRoomsAPI.addMessage(data);
+        // for another user
+        socket.emit('send_message', data);
+        await fetchData();
       }
-
-      const data = {
-        message: textMessage,
-        roomId: roomId,
-        is_admin: false,
-        userId,
-      };
-
-      //Tiếp theo nó sẽ postdata lên api đưa dữ liệu vào database
-      await ChatRoomsAPI.addMessage(data);
-
-      // for another user
-      socket.emit('send_message', data);
-
-      await fetchData();
-      setTextMessage('');
-    } catch (err) {
-      errorNotification(err?.response?.data?.mesage || err.message);
-    }
-  };
-
-  const fetchData = async () => {
-    if (!roomId) return;
-    try {
-      const response = await ChatRoomsAPI.getMessageByRoomId(roomId);
-      console.log(response);
-      setMessage(response.data.messages);
     } catch (err) {
       errorNotification(err?.response?.data?.message || err.message);
+    } finally {
+      setTextMessage('');
     }
   };
 
@@ -90,26 +98,28 @@ function Chat() {
       fetchData();
 
       socket.connect();
-
-      // for another client
-      // socket.on('posts', (data) => {
-      //   console.log(data);
-      // });
     }
     return () => {
       socket.disconnect();
     };
-  }, [activeChat, roomId]);
+  }, [activeChat]);
+  useEffect(() => {
+    socket.on('posts', (data) => {
+      // console.log(data);
 
-  //Hàm này dùng để nhận socket từ server gửi lên
-  // useEffect(() => {
-  // 	//Nhận dữ liệu từ server gửi lên thông qua socket với key receive_message
-  // 	socket.on('receive_message', (data) => {
-  // 		//Sau đó nó sẽ setLoad gọi lại hàm useEffect lấy lại dữ liệu
-  // 		setLoad(true);
-  // 	});
-  // }, []);
+      if (
+        data.action === 'post_mesage' &&
+        data.newMess.sender.role !== 'user'
+      ) {
+        const newId = localStorage.getItem('room_id');
 
+        fetchData(newId);
+      }
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   return (
     <div className="wrapper_chat">
       <div className="chat_messenger" onClick={onChat}>
@@ -157,25 +167,30 @@ function Chat() {
               <div className="ps-container ps-theme-default ps-active-y fix_scoll">
                 {message.length > 0 &&
                   message.map((value) =>
-                    !value.is_admin ? (
+                    value.sender.role === 'user' ? (
                       <div
                         className="media media-chat media-chat-reverse"
-                        key={value.id}
+                        key={value._id}
+                        ref={mesRef}
                       >
                         <div className="media-body">
-                          <p>You: {value.message}</p>
+                          <p>{value.message}</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="media media-chat" key={value.id}>
+                      <div
+                        className="media media-chat"
+                        key={value._id}
+                        ref={mesRef}
+                      >
                         {' '}
                         <img
                           className="avatar"
                           src="https://img.icons8.com/color/36/000000/administrator-male.png"
                           alt="..."
                         />
-                        <div className="media-body" key={value.id}>
-                          <p>Cộng tác viên: {value.message}</p>
+                        <div className="media-body" key={value._id}>
+                          <p>{value.message}</p>
                         </div>
                       </div>
                     ),
@@ -193,11 +208,11 @@ function Chat() {
                   onChange={onChangeText}
                   value={textMessage}
                   style={{ width: '80%' }}
-                  // onKeyPress={(e) => {
-                  //   if (e.key === 'Enter') {
-                  //     handlerSend();
-                  //   }
-                  // }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handlerSend(e);
+                    }
+                  }}
                 />
                 <a
                   onClick={(e) => handlerSend(e)}

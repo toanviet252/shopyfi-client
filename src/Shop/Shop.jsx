@@ -45,7 +45,6 @@ function Shop() {
     });
   };
 
-  //Hàm này dùng để thay đổi state pagination.search
   //Hàm này sẽ truyền xuống Component con và nhận dữ liệu từ Component con truyền lên
   const handlerSearch = (value) => {
     setPagination({
@@ -73,7 +72,6 @@ function Shop() {
   useEffect(() => {
     const fetchAllData = async () => {
       const res = await ProductAPI.getAPI(pagination);
-      console.log('>>', res);
 
       setProducts(res.data);
     };

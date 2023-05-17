@@ -24,6 +24,10 @@ const UserAPI = {
     const url = '/signout';
     return axiosClient.post(url);
   },
+
+  deleteChatroom: async (roomId) => {
+    return await axiosClient.delete(`/chatrooms/${roomId}`);
+  },
 };
 
 export default UserAPI;

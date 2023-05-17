@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { deleteSession } from '../Redux/Action/ActionSession';
 import { clearToken } from '../utils/auth';
 import { errorNotification } from '../helpers/notification';
@@ -10,13 +10,19 @@ import io from 'socket.io-client';
 function LoginLink() {
   const dispatch = useDispatch();
   // const socket = io('http://localhost:5000');
+  const roomId = localStorage.getItem('room_id');
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
+    if (!roomId) return;
     try {
-      clearToken();
+      // xóa session và roomid
+      await UserAPI.deleteChatroom(roomId);
       await UserAPI.postSignOut();
+      clearToken();
       const action = deleteSession('');
       dispatch(action);
+      navigate('/signin');
 
       // socket.disconnect();
     } catch (err) {
@@ -26,9 +32,9 @@ function LoginLink() {
 
   return (
     <li className="nav-item" onClick={handleSignOut}>
-      <Link className="nav-link" to="/signin">
+      <span className="nav-link" style={{ cursor: 'pointer' }}>
         ( Logout )
-      </Link>
+      </span>
     </li>
   );
 }

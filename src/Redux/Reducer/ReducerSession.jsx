@@ -6,7 +6,6 @@ const initialState = {
 const ReducerSession = (state = initialState, action) => {
   switch (action.type) {
     case 'ADD_SESSION':
-      console.log(action);
       return {
         ...state,
         isAuth: true,
@@ -14,7 +13,6 @@ const ReducerSession = (state = initialState, action) => {
       };
 
     case 'DELETE_SESSION':
-      console.log(action);
       return {
         ...state,
         isAuth: false,
