@@ -1,6 +1,5 @@
 import { io } from 'socket.io-client';
 
-const URL =
-  process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5000';
+const URL = 'https://mern-shopify.onrender.com';
 
 export const socket = io(URL);

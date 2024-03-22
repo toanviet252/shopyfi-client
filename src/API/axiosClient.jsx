@@ -2,11 +2,10 @@
 import axios from 'axios';
 import queryString from 'query-string';
 import { clearToken, getToken } from '../utils/auth';
-
 // Set up default config for http requests here
 // Please have a look at here `https://github.com/axios/axios#requestconfig` for the full list of configs
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: 'https://mern-shopify.onrender.com',
   paramsSerializer: (params) => queryString.stringify(params),
 });
 axiosClient.interceptors.request.use(async (config) => {
