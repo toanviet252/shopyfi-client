@@ -1,21 +1,19 @@
 import './App.css';
 import './css/custom.css';
 import './css/style.default.css';
-
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-
-import Footer from './Share/Footer/Footer';
-import Header from './Share/Header/Header';
-import Home from './Home/Home';
-import Detail from './Detail/Detail';
-import Cart from './Cart/Cart';
+import { Route, Routes } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import SignIn from './Authentication/SignIn';
 import SignUp from './Authentication/SignUp';
+import Cart from './Cart/Cart';
 import Checkout from './Checkout/Checkout';
+import Detail from './Detail/Detail';
 import History from './History/History';
-import Shop from './Shop/Shop';
+import Home from './Home/Home';
 import Chat from './Share/Chat/Chat';
-import { useSelector } from 'react-redux';
+import Footer from './Share/Footer/Footer';
+import Header from './Share/Header/Header';
+import Shop from './Shop/Shop';
 import { getToken } from './utils/auth';
 // import ErrorBoundary from './templates/ErrorBoundary';
 
@@ -25,21 +23,21 @@ function App() {
   return (
     <div className="App">
       {/* <ErrorBoundary> */}
-      <BrowserRouter>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/detail/:id" element={<Detail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/history/*" element={<History />} />
-          <Route path="/shop" element={<Shop />} />
-        </Routes>
-        {(isAuth || token) && <Chat />}
-        <Footer />
-      </BrowserRouter>
+
+      <Header />
+      <Routes>
+        <Route path="" element={<Home />} />
+        <Route path="/detail/:id" element={<Detail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/history/*" element={<History />} />
+        <Route path="/shop" element={<Shop />} />
+      </Routes>
+      {(isAuth || token) && <Chat />}
+      <Footer />
+
       {/* </ErrorBoundary> */}
     </div>
   );
