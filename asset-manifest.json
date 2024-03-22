@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/shopyfi-client/static/css/main.766e41b7.chunk.css",
-    "main.js": "/shopyfi-client/static/js/main.df0479a9.chunk.js",
-    "main.js.map": "/shopyfi-client/static/js/main.df0479a9.chunk.js.map",
+    "main.js": "/shopyfi-client/static/js/main.88d42e69.chunk.js",
+    "main.js.map": "/shopyfi-client/static/js/main.88d42e69.chunk.js.map",
     "runtime-main.js": "/shopyfi-client/static/js/runtime-main.178b47cc.js",
     "runtime-main.js.map": "/shopyfi-client/static/js/runtime-main.178b47cc.js.map",
     "static/js/2.c22ce6ad.chunk.js": "/shopyfi-client/static/js/2.c22ce6ad.chunk.js",
@@ -23,6 +23,6 @@
     "static/js/runtime-main.178b47cc.js",
     "static/js/2.c22ce6ad.chunk.js",
     "static/css/main.766e41b7.chunk.css",
-    "static/js/main.df0479a9.chunk.js"
+    "static/js/main.88d42e69.chunk.js"
   ]
 }
